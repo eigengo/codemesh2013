@@ -1,0 +1,4 @@
+/Users/janmachacek/Talks/springone2gx2013/native/rabbitmq-c/librabbitmq/CMakeFiles/rabbitmq.dir
+/Users/janmachacek/Talks/springone2gx2013/native/rabbitmq-c/librabbitmq/CMakeFiles/rabbitmq-static.dir
+/Users/janmachacek/Talks/springone2gx2013/native/rabbitmq-c/tests/CMakeFiles/test_parse_url.dir
+/Users/janmachacek/Talks/springone2gx2013/native/rabbitmq-c/tests/CMakeFiles/test_tables.dir
