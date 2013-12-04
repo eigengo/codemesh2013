@@ -7,4 +7,9 @@ import org.eigengo.cm.core.Core
 
 trait Api {
   this: Core =>
+
+  // our endpoints
+  val recogService = system.actorOf(Props(new RecogService(coordinator)))
+
+  IO(Http)(system) ! Http.Bind(recogService, "0.0.0.0", port = 8080)
 }
