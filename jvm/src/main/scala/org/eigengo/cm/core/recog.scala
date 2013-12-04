@@ -70,7 +70,32 @@ private[core] class RecogSessionActor(amqpConnection: ActorRef, jabberActor: Act
   }
 
   when(Active, stateTimeout) {
-    case Event(_, _) =>
+    case Event(Frame(frame), Starting(minCoins)) =>
+      // Frame with no decoder yet. We will be needing the H264DecoderContext.
+      val decoder = new H264DecoderContext(countCoins(minCoins))
+      decoder.decode(frame, true)
+      stay() using Running(decoder)
+    case Event(Frame(frame), Running(decoder)) if frame.length > 0 =>
+      // Frame with existing decoder. Just decode. (Teehee--I said ``Just``.)
+      decoder.decode(frame, true)
+      stay()
+    case Event(Frame(_), Running(decoder)) =>
+      // Last frame
+      decoder.close()
+      goto(Completed)
+
+    case Event(Image(image), Starting(minCoins)) =>
+      // Image with no decoder yet. We will be needing the ChunkingDecoderContext.
+      val decoder = new ChunkingDecoderContext(countCoins(minCoins))
+      decoder.decode(image, false)
+      stay() using Running(decoder)
+    case Event(Image(image), Running(decoder)) if image.length > 0 =>
+      // Image with existing decoder. Shut up and apply.
+      decoder.decode(image, false)
+      stay()
+    case Event(Image(_), Running(decoder)) =>
+      // Empty image (following the previous case)
+      decoder.close()
       goto(Completed)
   }
 
@@ -91,5 +116,7 @@ private[core] class RecogSessionActor(amqpConnection: ActorRef, jabberActor: Act
   override def postStop(): Unit = {
     context.stop(amqp)
   }
+
+  def countCoins(minCoins: Int)(f: Array[Byte]): Unit = ()
 }
 
