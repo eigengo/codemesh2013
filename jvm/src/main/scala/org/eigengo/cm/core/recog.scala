@@ -38,6 +38,13 @@ private[core] object RecogSessionActor {
 
 }
 
+trait RecogSessionActorFormats extends DefaultJsonProtocol {
+  import RecogSessionActor._
+
+  implicit val PointFormat = jsonFormat2(Point)
+  implicit val CoinFormat = jsonFormat2(Coin)
+  implicit val CoinResponseFormat = jsonFormat2(CoinResponse)
+}
 
 /**
  * This actor deals with the states of the recognition session. We use FSM here--even though
@@ -48,7 +55,8 @@ private[core] object RecogSessionActor {
  * @param jabberActor the actor that will receive our output
  */
 private[core] class RecogSessionActor(amqpConnection: ActorRef, jabberActor: ActorRef) extends
-  Actor with FSM[RecogSessionActor.State, RecogSessionActor.Data] {
+  Actor with FSM[RecogSessionActor.State, RecogSessionActor.Data] with
+  AmqpOperations with RecogSessionActorFormats with ImageEncoding {
   import RecogSessionActor._
   import CoordinatorActor._
   import scala.concurrent.duration._
@@ -117,13 +125,16 @@ private[core] class RecogSessionActor(amqpConnection: ActorRef, jabberActor: Act
     context.stop(amqp)
   }
 
-  def countCoins(minCoins: Int)(f: Array[Byte]): Unit = ()
+  def countCoins(minCoins: Int)(f: Array[Byte]): Unit =
+    amqpAsk[CoinResponse](amqp)("cm.exchange", "cm.coins.key", mkImagePayload(f)) onSuccess {
+      case res => if (res.coins.size >= minCoins) jabberActor ! res
+    }
+
 }
 
 private[core] trait AmqpOperations {
 
-  def amqpAsk(amqp: ActorRef)(exchange: String, routingKey: String, payload: Array[Byte])
-             (implicit ctx: ExecutionContext): Future[String] = {
+  def amqpAsk[A](amqp: ActorRef)(exchange: String, routingKey: String, payload: Array[Byte])(implicit ctx: ExecutionContext, reader: JsonReader[A]): Future[A] = {
     import scala.concurrent.duration._
     import akka.pattern.ask
 
@@ -131,7 +142,8 @@ private[core] trait AmqpOperations {
 
     (amqp ? Request(Publish(exchange, routingKey, payload) :: Nil)).map {
       case Response(Delivery(_, _, _, body) :: _) =>
-        new String(body)
+        val s = new String(body)
+        reader.read(JsonParser(s))
     }
   }
 

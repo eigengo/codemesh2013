@@ -544,7 +544,7 @@ private[core] class RecogSessionActor(amqpConnection: ActorRef, jabberActor: Act
     ...
   }
 
-  def countCoins(minCoins: Int)(image: Array[Byte]): Unit = ()
+  def countCoins(minCoins: Int)(f: Array[Byte]): Unit = ()
 }
 ```
 
@@ -636,8 +636,8 @@ private[core] class RecogSessionActor(amqpConnection: ActorRef, jabberActor: Act
   RecogSessionActorFormats {
 
 
-  def countCoins(minCoins: Int)(image: Array[Byte]): Unit =
-    amqpAsk[CoinResponse](amqp)("amq.direct", "count.key", mkImagePayload(image)) onSuccess {
+  def countCoins(minCoins: Int)(f: Array[Byte]): Unit =
+    amqpAsk[CoinResponse](amqp)("cm.exchange", "cm.coins.key", mkImagePayload(image)) onSuccess {
       case res => if (res.coins.size >= minCoins) jabberActor ! res
     }
 }
