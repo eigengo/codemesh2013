@@ -8,7 +8,7 @@ import java.io.{ InputStream, BufferedInputStream, FileInputStream }
  * Shell provides the command-line interface to the functionality in
  * ``Core`` (which is configured by ``ConfigCoreConfiguration``)
  */
-object Shell extends App {
+object Shell extends App with Core with ConfigCoreConfiguration {
 
   import CoordinatorActor._
   import Commands._
@@ -29,6 +29,7 @@ object Shell extends App {
 
   // start processing the commands
   commandLoop()
+  system.shutdown()
 
 }
 
