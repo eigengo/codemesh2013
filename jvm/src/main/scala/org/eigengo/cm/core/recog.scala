@@ -59,6 +59,8 @@ private[core] class RecogSessionActor(amqpConnection: ActorRef, jabberActor: Act
 
   val emptyBehaviour: StateFunction = { case _ => stay() }
 
+  val amqp = ConnectionOwner.createChildActor(amqpConnection, Props(new RpcClient()))
+
   startWith(Idle, Empty)
 
   when(Idle, stateTimeout) {
@@ -79,6 +81,15 @@ private[core] class RecogSessionActor(amqpConnection: ActorRef, jabberActor: Act
     case Event(StateTimeout, _) => goto(Aborted)
   }
 
+  onTransition {
+    case _ -> Aborted => context.stop(self)
+    case _ -> Completed => context.stop(self)
+  }
+
   initialize()
+
+  override def postStop(): Unit = {
+    context.stop(amqp)
+  }
 }
 
