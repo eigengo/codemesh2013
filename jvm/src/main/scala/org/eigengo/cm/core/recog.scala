@@ -57,12 +57,26 @@ private[core] class RecogSessionActor(amqpConnection: ActorRef, jabberActor: Act
   // default timeout for all states
   val stateTimeout = 60.seconds
 
+  val emptyBehaviour: StateFunction = { case _ => stay() }
+
   startWith(Idle, Empty)
 
   when(Idle, stateTimeout) {
     case Event(Begin(minCoins), _) =>
       sender ! self.path.name
       goto(Active)
+  }
+
+  when(Active, stateTimeout) {
+    case Event(_, _) =>
+      goto(Completed)
+  }
+
+  when(Aborted)(emptyBehaviour)
+  when(Completed)(emptyBehaviour)
+
+  whenUnhandled {
+    case Event(StateTimeout, _) => goto(Aborted)
   }
 
   initialize()
