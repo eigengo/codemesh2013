@@ -74,7 +74,7 @@ private[core] class RecogSessionActor(amqpConnection: ActorRef, jabberActor: Act
   when(Idle, stateTimeout) {
     case Event(Begin(minCoins), _) =>
       sender ! self.path.name
-      goto(Active)
+      goto(Active) using Starting(minCoins)
   }
 
   when(Active, stateTimeout) {

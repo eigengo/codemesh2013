@@ -653,8 +653,19 @@ begin:1
 >>> 3ce43dc1-7397-4ab7-89ad-ecf70ebf681a
 3ce43dc1-7397-4ab7-89ad-ecf70ebf681a/h264:/coins.mp4
 ...
+```
 
-quit
+But what is this? Unhandled event? Aha. We've forgotten to move to the ``Active`` state using the right data. Let's update
+```
+class RecogSessionActor ... {
+  ...
+  when(Idle, stateTimeout) {
+    case Event(Begin(minCoins), _) =>
+      sender ! self.path.name
+      goto(Active) using Starting(minCoins)
+  }
+  ...
+}
 ```
 
 So, it works.
