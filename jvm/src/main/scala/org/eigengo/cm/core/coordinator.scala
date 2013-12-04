@@ -24,5 +24,13 @@ object CoordinatorActor {
 class CoordinatorActor(amqpConnection: ActorRef) extends Actor {
   import CoordinatorActor._
 
-  def receive: Receive = ???
+  // sends the messages out
+  private val jabber = context.actorOf(Props[JabberActor])
+
+  def receive = {
+    case b @ Begin(_) =>
+      val rsa = context.actorOf(Props(new RecogSessionActor(amqpConnection, jabber)), UUID.randomUUID().toString)
+      rsa.forward(b)
+  }
+
 }

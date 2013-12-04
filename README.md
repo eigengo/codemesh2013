@@ -161,7 +161,7 @@ The coordinator is responsible for the sessions; begins one when it receives the
 class CoordinatorActor(amqpConnection: ActorRef) extends Actor {
   import CoordinatorActor._
 
-  val jabber = context.actorOf(Props[JabberActor].withRouter(FromConfig()), "jabber")
+  private val jabber = context.actorOf(Props[JabberActor])
 
   def receive = {
     case b@Begin(_) =>
