@@ -31,6 +31,8 @@ class CoordinatorActor(amqpConnection: ActorRef) extends Actor {
     case b @ Begin(_) =>
       val rsa = context.actorOf(Props(new RecogSessionActor(amqpConnection, jabber)), UUID.randomUUID().toString)
       rsa.forward(b)
+    case GetSessions =>
+      sender ! context.children.filter(jabber !=).map(_.path.name).toList
   }
 
 }

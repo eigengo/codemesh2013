@@ -15,11 +15,19 @@ object Shell extends App with Core with ConfigCoreConfiguration {
   import akka.actor.ActorDSL._
   import Utils._
 
+  implicit val _ = actor(new Act {
+    become {
+      case x => println(">>> " + x)
+    }
+  })
+
   // main command loop
   @tailrec
   private def commandLoop(): Unit = {
     Console.readLine() match {
       case QuitCommand => return
+      case BeginCommand(count) => coordinator ! Begin(count.toInt)
+      case GetSessionsCommand  => coordinator ! GetSessions
 
       case _ => println("WTF??!!")
     }
