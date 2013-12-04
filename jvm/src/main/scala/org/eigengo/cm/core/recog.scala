@@ -120,3 +120,19 @@ private[core] class RecogSessionActor(amqpConnection: ActorRef, jabberActor: Act
   def countCoins(minCoins: Int)(f: Array[Byte]): Unit = ()
 }
 
+private[core] trait AmqpOperations {
+
+  def amqpAsk(amqp: ActorRef)(exchange: String, routingKey: String, payload: Array[Byte])
+             (implicit ctx: ExecutionContext): Future[String] = {
+    import scala.concurrent.duration._
+    import akka.pattern.ask
+
+    implicit val timeout = Timeout(2.seconds)
+
+    (amqp ? Request(Publish(exchange, routingKey, payload) :: Nil)).map {
+      case Response(Delivery(_, _, _, body) :: _) =>
+        new String(body)
+    }
+  }
+
+}
