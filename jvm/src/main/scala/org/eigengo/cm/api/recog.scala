@@ -6,11 +6,9 @@ import spray.http.HttpResponse
 import spray.can.Http
 import spray.can.Http.RegisterChunkHandler
 import org.eigengo.cm.core.CoordinatorActor
-import spray.routing.{Directive, RequestContext, Directives}
+import spray.routing.{RequestContext, Directives}
 import spray.httpx.marshalling.{MetaMarshallers, BasicToResponseMarshallers}
 import scala.concurrent.ExecutionContext
-import akka.routing.Route
-import spray.routing
 
 object RecogService {
   val Recog   = "recog"
