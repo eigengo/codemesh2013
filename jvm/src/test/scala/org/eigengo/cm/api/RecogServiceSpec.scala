@@ -9,16 +9,16 @@ class RecogServiceSpec extends Specification with Specs2RouteTest with BasicReco
 
   class TestCoordinatorActor extends Actor {
     def receive: Receive = {
-      case Begin(_) => sender ! "foo"
+      case Begin(_) => sender ! "a10b2f45-87dd-4fe1-accf-3361763c1553"
     }
   }
 
-  "The service" should {
+  "Basic recog service" should {
     val coordinator = system.actorOf(Props(new TestCoordinatorActor))
 
     "return the session ID on post" in {
       Post("/recog") ~> normalRoute(coordinator) ~> check {
-        responseAs[String] mustEqual "foo"
+        responseAs[String] mustEqual "a10b2f45-87dd-4fe1-accf-3361763c1553"
       }
     }
 

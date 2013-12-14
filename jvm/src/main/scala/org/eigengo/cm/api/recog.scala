@@ -16,7 +16,7 @@ object RecogService {
   val H264    = "h264"
 }
 
-trait BasicRecogService extends Directives with MetaMarshallers with BasicToResponseMarshallers {
+trait BasicRecogService extends Directives {
   import scala.concurrent.duration._
   import akka.pattern.ask
   import CoordinatorActor._
@@ -40,7 +40,7 @@ trait BasicRecogService extends Directives with MetaMarshallers with BasicToResp
     }
 }
 
-trait StreamingRecogService extends Directives with MetaMarshallers with BasicToResponseMarshallers {
+trait StreamingRecogService extends Directives {
   this: Actor =>
 
   import CoordinatorActor._
@@ -68,12 +68,12 @@ trait StreamingRecogService extends Directives with MetaMarshallers with BasicTo
 
 }
 
-class RecogServiceActor(coordinator: ActorRef) extends BasicRecogService with StreamingRecogService with Actor {
+class RecogServiceActor(coordinator: ActorRef) extends Actor with BasicRecogService with StreamingRecogService {
   import context.dispatcher
   val normal = normalRoute(coordinator)
   val chunked = chunkedRoute(coordinator)
 
-  def receive: Receive = {
+  def receive: Receive =  {
     // clients get connected to self (singleton handler)
     case _: Http.Connected => sender ! Http.Register(self)
     // POST to /recog/...
