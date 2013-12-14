@@ -31,7 +31,8 @@ libraryDependencies ++= Seq(
   "io.spray"                 % "spray-client"       % "1.2.0",
   "io.spray"                %% "spray-json"         % "1.2.3",
   "io.spray"                 % "spray-testkit"      % "1.2.0"    % "test",
-  "com.typesafe.akka"       %% "akka-testkit"       % "2.2.3"     % "test"
+  "com.typesafe.akka"       %% "akka-testkit"       % "2.2.3"    % "test",
+  "org.specs2"              %% "specs2"             % "2.2.3"    % "test"
 )
 
 parallelExecution in Test := false
